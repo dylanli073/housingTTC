@@ -1,3 +1,13 @@
+import random
+
+house_mapping = {"Adams": 1, "Cabot": 2, "Currier": 3, "Dunster": 4, "Eliot": 5, "Kirkland": 6, "Leverett": 7, "Lowell": 8,
+    "Mather": 9, "Pfoho": 10, "Quincy": 11, "Winthrop": 12}
+num_mapping = {1:"Adams", 2:"Cabot", 3:"Currier", 4:"Dunster", 5:"Eliot", 6:"Kirkland", 7:"Leverett", 8:"Lowell",
+    9:"Mather", 10:"Pfoho", 11:"Quincy", 12:"Winthrop"}
+group_prefs = {"Adams":{}, "Cabot": {}, "Currier": {}, "Dunster": {}, "Eliot": {}, "Kirkland":{}, "Leverett": {}, "Lowell": {},
+    "Mather": {}, "Pfoho": {}, "Quincy": {}, "Winthrop": {}} # organized by house, then by group size
+
+
 def process(g, n, p, u, v, e, mw, c_i):
     u.remove(n)
     v.add(n)
@@ -60,9 +70,45 @@ def executeSwaps(g, min_weight, cycle):
                 g[parent][edge] = (v, w-min_weight)
     return g
 
+def multiGraphMaker(block_size, group_prefs):
+    house_graph = {"Adams":{}, "Cabot": {}, "Currier": {}, "Dunster": {}, "Eliot": {}, "Kirkland":{}, "Leverett": {}, "Lowell": {},
+    "Mather": {}, "Pfoho": {}, "Quincy": {}, "Winthrop": {}}
+    for name, house in group_prefs.items():
+        out_edges = [0] * 12
+        for _, pref in house[block_size]:
+            out_edges[pref[0]-1] += 1
+        for k in range(len(out_edges)):
+            if out_edges[k] != 0:
+                house_graph[name] = (num_mapping[k], out_edges[k])
+    print(house_graph)
 
-test_g = [[(1, 10)], [(2, 12)], [(3, 13)], [(4, 16)], [(5, 14)],
-         [(6, 16)], [(7, 15)], [(8, 14)], [(9, 13)], [(10, 16)],
-         [(11, 16)], [(0, 11)]]
-min_weight, cycle = findCycle(test_g)
-print(executeSwaps(test_g, min_weight, cycle))
+def main():
+    total_groups = int(input("Input # of groups: "))
+
+    # accept groups in the format: [groupname, groupsize, starting house name, rankings] rep. in number values
+    # adding each individual into the system, with group name and preference ordering
+    for group in range(total_groups):
+        specs = list(input().split())
+        groupSize = int(specs[0])
+        startingHouse = specs[1]
+        blocking_name = specs[2]
+
+        if groupSize < 0 or groupSize > 8:
+            print("\nInput group size between 1 and 8 inclusive")
+            return False
+
+        # checking if one house appears twice in preference ordering, checking if original house appears in order
+        if len(set(specs[3:] + [str(house_mapping[startingHouse])])) != len(specs[3:] + [str(house_mapping[startingHouse])]):
+            print("\nIncorrect preference order format")
+            return False
+
+        # consider if blocking group name is used before
+
+        try:
+            group_prefs[startingHouse][groupSize].append((blocking_name, list((map(int, specs[3:])))))
+        except:
+            group_prefs[startingHouse][groupSize] = [(blocking_name, list(map(int, specs[3:])))]
+    print(group_prefs)
+
+if __name__ == "__main__":
+    main()
