@@ -77,7 +77,7 @@ def runTTC(groupSize):
                     if iteration[housename] >= len(group_prefs[housename][groupSize])-1: # checking if iterations is greater than the number that want to trade
                         empty_houses.add(housename) # already in visited set, will not be visited later
                 return numTradesDFS
-            except ValueError:
+            except ValueError: 
                 return 0
                 
         # based on guarantee that each node has one outgoing edge
