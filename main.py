@@ -8,12 +8,12 @@ group_prefs = {"Adams":{}, "Cabot": {}, "Currier": {}, "Dunster": {}, "Eliot": {
     "Mather": {}, "Pfoho": {}, "Quincy": {}, "Winthrop": {}} # organized by house, then by group size
 
 def main():
-    total_groups = int(raw_input())
+    total_groups = int(input())
 
     # accept groups in the format: [groupsize, starting house name, rankings rep. in number values
     # adding each individual into the system, with group name and preference ordering
     for group in range(total_groups):
-        input = list(raw_input().split())
+        input = list(input().split())
         blocking_name = [input[0]]
         groupSize = int(input[1])
         startingHouse = input[2]
@@ -81,7 +81,7 @@ def runTTC(round):
     """
 
 
-def removeGroups()
+def removeGroups():
     """Cleans up and removes groups that have already been used"""
 
 
