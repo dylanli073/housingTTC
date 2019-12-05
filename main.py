@@ -13,7 +13,7 @@ test_group_prefs = {"Adams":{1:[('a', [2,3,4,5,6,7,8,9,10,11,12,1])]}, "Cabot": 
                     "Mather": {1:[('i', [10,2,3,4,5,6,8,1,9,11,12])]}, "Pfoho": {1:[('j', [11,2,3,4,5,6,7,8,9,1,12])]},
                     "Quincy": {1:[('k', [12,2,3,4,5,6,7,8,9,10,11,1])]}, "Winthrop": {1:[('l', [1,2,3,4,5,6,7,8,9,10,11,12])]}}
 def main():
-    """total_groups = int(input())
+    total_groups = int(input())
 
     # accept groups in the format: [groupname, groupsize, starting house name, rankings] rep. in number values
     # adding each individual into the system, with group name and preference ordering
@@ -42,15 +42,13 @@ def main():
     # running 8 rounds for all of the possible blocking group sizes
     rounds = 8
     graph = preprocessing(8)
-    # for groupSize in range(rounds): 
+    # for groupSize in range(rounds):
     #     # preprocessing the lists in dictionary to order by the largest group size first
     #     graph = preprocessing(groupSize)
     #     if len(graph) == 0:
     #         return False
     #     print("Running group size of size " + str(groupSize))
     #     runTTC(graph, groupSize)
-    """
-    multiGraphMaker(1)
 
 def preprocessing(total): 
     """preprocessing pairs up items into groups, both by size and the most preferred item available, 
