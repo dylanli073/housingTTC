@@ -17,7 +17,7 @@ def main():
     # parser.parse_args
 
     f = open("input.txt", "w")
-    groups = 100
+    groups = 100 
     f.write(str(groups) + "\n")
     # for each iteration, copy from the original and write to the file according to the spec
     for group in range(groups):
