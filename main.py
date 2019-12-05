@@ -97,7 +97,7 @@ def multiGraphMaker(block_size):
             out_edges[pref[0]-1] += 1
         for k in range(len(out_edges)):
             if out_edges[k] != 0:
-                house_graph[name] = (num_mapping[k+1], out_edges[k])
+                house_graph[name] = (num_mapping[k], out_edges[k])
     print(house_graph)
 
 
