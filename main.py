@@ -4,16 +4,21 @@ house_mapping = {"Adams": 1, "Cabot": 2, "Currier": 3, "Dunster": 4, "Eliot": 5,
     "Mather": 9, "Pfoho": 10, "Quincy": 11, "Winthrop": 12}
 num_mapping = {1:"Adams", 2:"Cabot", 3:"Currier", 4:"Dunster", 5:"Eliot", 6:"Kirkland", 7:"Leverett", 8:"Lowell", 
     9:"Mather", 10:"Pfoho", 11:"Quincy", 12:"Winthrop"}
-group_prefs = {"Adams":{}, "Cabot": {}, "Currier": {}, "Dunster": {}, "Eliot": {}, "Leverett": {}, "Lowell": {}, 
+group_prefs = {"Adams":{}, "Cabot": {}, "Currier": {}, "Dunster": {}, "Eliot": {}, "Kirkland":{}, "Leverett": {}, "Lowell": {},
     "Mather": {}, "Pfoho": {}, "Quincy": {}, "Winthrop": {}} # organized by house, then by group size
-
+test_group_prefs = {"Adams":{1:[('a', [2,3,4,5,6,7,8,9,10,11,12,1])]}, "Cabot": {1:[('b', [3,1,4,5,6,7,8,9,10,11,12,2])]},
+                    "Currier": {1:[('c', [4,2,1,5,6,7,8,9,10,11,12,3])]}, "Dunster":{1:[('d', [5,1,2,3,6,7,8,9,10,11,12,4])]},
+                    "Eliot": {1:[('e', [6,1,2,3,4,7,8,9,10,11,12,5])]}, "Kirkland":{1:[('f', [7,1,2,3,6,8,9,10,11,12,4])]},
+                    "Leverett": {1:[('g', [8,2,3,4,5,1,7,9,10,11,12,6])]}, "Lowell": {1:[('h', [9,2,3,4,5,7,1,8,10,11,12])]},
+                    "Mather": {1:[('i', [10,2,3,4,5,6,8,1,9,11,12])]}, "Pfoho": {1:[('j', [11,2,3,4,5,6,7,8,9,1,12])]},
+                    "Quincy": {1:[('k', [12,2,3,4,5,6,7,8,9,10,11,1])]}, "Winthrop": {1:[('l', [1,2,3,4,5,6,7,8,9,10,11,12])]}}
 def main():
-    total_groups = int(raw_input())
+    """total_groups = int(input())
 
-    # accept groups in the format: [groupsize, starting house name, rankings rep. in number values
+    # accept groups in the format: [groupname, groupsize, starting house name, rankings] rep. in number values
     # adding each individual into the system, with group name and preference ordering
     for group in range(total_groups):
-        input = list(raw_input().split())
+        input = list(input().split())
         blocking_name = [input[0]]
         groupSize = int(input[1])
         startingHouse = input[2]
@@ -44,7 +49,8 @@ def main():
     #         return False
     #     print("Running group size of size " + str(groupSize))
     #     runTTC(graph, groupSize)
-
+    """
+    multiGraphMaker(1)
 
 def preprocessing(total): 
     """preprocessing pairs up items into groups, both by size and the most preferred item available, 
@@ -74,15 +80,27 @@ def preprocessing(total):
                 endPtr -= 1
     return pairs
 
+def runTTC(prefs, round):
 
-def runTTC(round):
     """Function runs TTC for the blocking groups, accepts preferences and round # as inputs, 
     outputs paired trades, updates global ledger
     """
 
 
-def removeGroups()
+def removeGroups():
     """Cleans up and removes groups that have already been used"""
+
+def multiGraphMaker(block_size):
+    house_graph = {"Adams":{}, "Cabot": {}, "Currier": {}, "Dunster": {}, "Eliot": {}, "Kirkland":{}, "Leverett": {}, "Lowell": {},
+    "Mather": {}, "Pfoho": {}, "Quincy": {}, "Winthrop": {}}
+    for name, house in test_group_prefs.items():
+        out_edges = [0] * 12
+        for _, pref in house[block_size]:
+            out_edges[pref[0]-1] += 1
+        for k in range(len(out_edges)):
+            if out_edges[k] != 0:
+                house_graph[name] = (num_mapping[k+1], out_edges[k])
+    print(house_graph)
 
 
 def runDFS():
