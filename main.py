@@ -1,3 +1,5 @@
+# still needs to run over multiple preferences, 1-12
+
 import random
 
 house_mapping = {"Adams": 1, "Cabot": 2, "Currier": 3, "Dunster": 4, "Eliot": 5, "Kirkland": 6, "Leverett": 7, "Lowell": 8, 
@@ -6,16 +8,17 @@ num_mapping = {1:"Adams", 2:"Cabot", 3:"Currier", 4:"Dunster", 5:"Eliot", 6:"Kir
     9:"Mather", 10:"Pfoho", 11:"Quincy", 12:"Winthrop"}
 group_prefs = {"Adams":{}, "Cabot": {}, "Currier": {}, "Dunster": {}, "Eliot": {}, "Kirkland":{}, "Leverett": {}, "Lowell": {},
     "Mather": {}, "Pfoho": {}, "Quincy": {}, "Winthrop": {}} # organized by house, then by group size
-def main():
-    total_groups = int(input("Input # of groups: "))
 
-    # accept groups in the format: [groupname, groupsize, starting house name, rankings] rep. in number values
+def main():
+    total_groups = int(raw_input())
+    totalTrades = 0
+    # accept groups in the format: {[(['groupname'], 'Quincy', [10, 5, 7, 2, 9, 4, 3, 8, 1, 12, 6])]
     # adding each individual into the system, with group name and preference ordering
     for group in range(total_groups):
-        specs = list(input().split())
-        groupSize = int(specs[0])
-        startingHouse = specs[1]
-        blocking_name = specs[2]
+        input = list(raw_input().split())
+        blocking_name = input[0]
+        groupSize = int(input[1])
+        startingHouse = input[2]
 
         if groupSize < 0 or groupSize > 8:
             print("\nInput group size between 1 and 8 inclusive")
@@ -27,7 +30,6 @@ def main():
             return False
 
         # consider if blocking group name is used before
-
         try:
             group_prefs[startingHouse][groupSize].append((blocking_name, list((map(int, specs[3:])))))
         except:
@@ -98,7 +100,16 @@ def runDFS():
     """Graph search algorithm for finding cycles, accepts input graph in adjacency list format, outputs cycles
     and clears the current market, returns number of cycles cleared
     """
+    # running 8 rounds for all of the possible blocking group sizes
+    rounds = 8
+    # graph = preprocessing(rounds)
 
+    for groupSize in range(rounds, 0, -1): 
+        # preprocessing the lists in dictionary to order by the largest group size firsts
+        print("Running group size of size " + str(groupSize))
+        totalTrades += runTTC(groupSize)
+        print("totaltrades: " + str(totalTrades))
+    return totalTrades
 
 if __name__ == "__main__":
     main()
