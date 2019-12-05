@@ -8,8 +8,6 @@ num_mapping = {1:"Adams", 2:"Cabot", 3:"Currier", 4:"Dunster", 5:"Eliot", 6:"Kir
     9:"Mather", 10:"Pfoho", 11:"Quincy", 12:"Winthrop"}
 group_prefs = {"Adams":{}, "Cabot": {}, "Currier": {}, "Dunster": {}, "Eliot": {}, "Leverett": {}, "Lowell": {}, "Kirkland":{},
     "Mather": {}, "Pfoho": {}, "Quincy": {}, "Winthrop": {}} # organized by house, then by group size
-totalTrades = 0
-
 
 def runTTC(groupSize):
     """Function runs TTC for the blocking groups, accepts preferences and round # as inputs, 
@@ -19,9 +17,11 @@ def runTTC(groupSize):
             "Mather": 0, "Pfoho": 0, "Quincy": 0, "Winthrop": 0}
     allHouses = set(["Adams", "Cabot", "Currier", "Dunster", "Eliot", "Kirkland", "Leverett", "Lowell", 
             "Mather", "Pfoho", "Quincy", "Winthrop"])
+    numTrades = 0
+
 
     empty_houses = set()
-    # shuffling each list 
+    # shuffling each list, RSD mechanism implemented by each house
     for house in allHouses: 
         try:
             random.shuffle(group_prefs[house][groupSize])
@@ -34,47 +34,60 @@ def runTTC(groupSize):
         if halted:
             chosen_house = random.sample(remainingHouses, 1)[0] # move one down ledger for this house
             iteration[chosen_house] += 1
-            if iteration[chosen_house] >= len(group_prefs[house][groupSize]):
+            # print("DL1", house, iteration[chosen_house], len(group_prefs[chosen_house][groupSize]))
+            if iteration[chosen_house] >= len(group_prefs[chosen_house][groupSize])-1:
                 empty_houses.add(chosen_house)
                 continue
-
         # adding the names and preference ordering for each node within the graph
         graph_nodes = []
+
         for house in remainingHouses: 
             graph_nodes.append(group_prefs[house][groupSize][iteration[house]]) # returns the tuple associated
-        print(graph_nodes)
         visited = set()
         graph = preprocessing(graph_nodes)
+
         def runDFS(house):
             """Graph search algorithm for finding cycles, accepts input graph in adjacency list format, outputs cycles
             and clears the current market, returns number of cycles cleared
             """
             visited.add(house)
             stack = [house]
+            numTradesDFS = 0
             remainingHouses.remove(house)
-            while house in graph and graph[house] not in visited:
-                house = graph[house]
+            print(house, graph)
+            if house not in graph:
                 remainingHouses.remove(house)
-                stack.append(graph[house])
+
+            # check this while loop, should be finding the house and removing house when it has been considered, consider switching *visited* to *remainingHouses*
+            while house in graph and graph[house] not in visited: # while house in remainingHouses? 
+                house = graph[house]
+                if house in remainingHouses:
+                    remainingHouses.remove(house)
+                    stack.append(house)
+                else:
+                    return 0
             try: 
                 cycle_start = stack.index(graph[house])
-                for house in range(cycle_start, len(stack)):
-                    iteration[house] += 1
+                for chose_house in range(cycle_start, len(stack)):
+                    housename = stack[chose_house]
+                    iteration[housename] += 1
+
                     # making the trade here
-
-                    totalTrades += groupSize
-
-                    if iteration[house] >= len(group_prefs[house][groupSize]): # checking if iterations is greater than the number that want to trade
-                        empty_houses.add(house) # already in visited set, will not be visited later
-                return True
-            except KeyError:
-                return False
+                    numTradesDFS = numTradesDFS + groupSize
+                    if iteration[housename] >= len(group_prefs[housename][groupSize])-1: # checking if iterations is greater than the number that want to trade
+                        empty_houses.add(housename) # already in visited set, will not be visited later
+                return numTradesDFS
+            except ValueError:
+                return 0
                 
         # based on guarantee that each node has one outgoing edge
         halted = True
         while len(remainingHouses) > 0:
-            if runDFS(random.sample(remainingHouses, 1)[0]): 
+            subtraded = runDFS(random.sample(remainingHouses, 1)[0])
+            if subtraded > 0: 
                 halted = False
+                numTrades += subtraded
+        return numTrades
 
 
 def preprocessing(graph_nodes):
@@ -83,19 +96,18 @@ def preprocessing(graph_nodes):
     """
     adjacency_list = {}
     for node in graph_nodes: 
-        print(node)
-        adjacency_list[node[1][1]] = num_mapping[node[1][2]] # node[1][2] is the top choice house, num_mapping translates to house name
+        adjacency_list[node[1]] = num_mapping[node[2][0]] # node[1][2] is the top choice house, num_mapping translates to house name
     return adjacency_list
 
 
 def main():
     total_groups = int(raw_input())
-
-    # accept groups in the format: [groupname, groupsize, starting house name, rankings rep. in number values]
+    totalTrades = 0
+    # accept groups in the format: {[(['groupname'], 'Quincy', [10, 5, 7, 2, 9, 4, 3, 8, 1, 12, 6])]
     # adding each individual into the system, with group name and preference ordering
     for group in range(total_groups):
         input = list(raw_input().split())
-        blocking_name = [input[0]]
+        blocking_name = input[0]
         groupSize = int(input[1])
         startingHouse = input[2]
 
@@ -109,22 +121,19 @@ def main():
             return False
 
         # consider if blocking group name is used before
-        print(group)
         try:
-            group_prefs[startingHouse][groupSize].append((blocking_name, (map(int, input[3:]))))
+            group_prefs[startingHouse][groupSize].append((blocking_name, startingHouse, (map(int, input[3:]))))
         except:
-            group_prefs[startingHouse][groupSize] = [(blocking_name, (map(int, input[3:])))]
-
+            group_prefs[startingHouse][groupSize] = [(blocking_name, startingHouse, (map(int, input[3:])))]
     # running 8 rounds for all of the possible blocking group sizes
     rounds = 8
     # graph = preprocessing(rounds)
-    print(group_prefs)
 
     for groupSize in range(rounds, 0, -1): 
         # preprocessing the lists in dictionary to order by the largest group size firsts
         print("Running group size of size " + str(groupSize))
-        runTTC(groupSize)
-
+        totalTrades += runTTC(groupSize)
+        print("totaltrades: " + str(totalTrades))
     return totalTrades
 
 if __name__ == "__main__":
