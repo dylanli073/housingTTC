@@ -14,12 +14,11 @@ def runTTC(groupSize, pref_number):
     """Function runs TTC for the blocking groups, accepts preferences and round # as inputs, 
     outputs paired trades, updates global ledger
     """
-    # iteration = {"Adams": 0, "Cabot": 0, "Currier": 0, "Dunster": 0, "Eliot": 0, "Kirkland": 0, "Leverett": 0, "Lowell": 0, 
-    #         "Mather": 0, "Pfoho": 0, "Quincy": 0, "Winthrop": 0}
+    iteration = {"Adams": 0, "Cabot": 0, "Currier": 0, "Dunster": 0, "Eliot": 0, "Kirkland": 0, "Leverett": 0, "Lowell": 0, 
+            "Mather": 0, "Pfoho": 0, "Quincy": 0, "Winthrop": 0}
     allHouses = set(["Adams", "Cabot", "Currier", "Dunster", "Eliot", "Kirkland", "Leverett", "Lowell", 
             "Mather", "Pfoho", "Quincy", "Winthrop"])
     numTrades = 0
-
 
     empty_houses = set()
     # shuffling each list, RSD mechanism implemented by each house
@@ -35,10 +34,12 @@ def runTTC(groupSize, pref_number):
         if halted:
             chosen_house = random.sample(remainingHouses, 1)[0] # move one down ledger for this house
             # iteration[chosen_house] += 1
-            # print("DL1", house, iteration[chosen_house], len(group_prefs[chosen_house][groupSize]))
+            # almost correct, but popping does not allow later rounds to leverage preferences
             group_prefs[chosen_house][groupSize].pop(0)
             if len(group_prefs[chosen_house][groupSize]) <= 0:
                 empty_houses.add(chosen_house)
+                group_prefs[chosen_house].pop(groupSize)
+                halted = False
                 continue
         # adding the names and preference ordering for each node within the graph
         graph_nodes = []
@@ -60,15 +61,18 @@ def runTTC(groupSize, pref_number):
                 remainingHouses.remove(house)
 
             # check this while loop, should be finding the house and removing house when it has been considered, consider switching *visited* to *remainingHouses*
-            while house in graph and graph[house] not in visited: # while house in remainingHouses? 
+            while house in graph: # while house in remainingHouses? 
                 house = graph[house]
-                if house in remainingHouses:
+                if house in remainingHouses and house not in visited:
+                    visited.add(house)
                     remainingHouses.remove(house)
                     stack.append(house)
+                elif house in stack:
+                    break # go on to the cycle
                 else:
                     return 0
             try: 
-                cycle_start = stack.index(graph[house])
+                cycle_start = stack.index(house)
                 for chose_house in range(cycle_start, len(stack)):
                     housename = stack[chose_house]
                     # iteration[housename] += 1
@@ -90,7 +94,8 @@ def runTTC(groupSize, pref_number):
             if subtraded > 0: 
                 halted = False
                 numTrades += subtraded
-        return numTrades
+    print(empty_houses)
+    return numTrades
 
 
 def preprocessing(graph_nodes, pref_number):
@@ -131,8 +136,6 @@ def main():
     # running 8 rounds for all of the possible blocking group sizes
     rounds = 8
     # graph = preprocessing(rounds)
-
-    print(group_prefs)
 
     for groupSize in range(rounds, 0, -1): 
         # preprocessing the lists in dictionary to order by the largest group size firsts
