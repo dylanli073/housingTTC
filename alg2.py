@@ -44,7 +44,7 @@ def findCycle(g):
         if g[i] and not min_weight_set:
             min_weight_set = True
             min_weight = g[i][0][1]
-    data = (None, None)
+    data = (False, None)
     c_i = False
     k = -1
 
@@ -71,10 +71,17 @@ def executeSwaps(g, min_weight, cycle):
             parent = cycle[house + 1]
         except:
             parent = cycle[0]
-        for edge in range(len(g[cycle[parent]])):
+        edge_found = False
+        edge = -1
+        while not edge_found:
+            edge += 1
             v, w = g[parent][edge]
-            if v == cycle[house]:
+            if v == cycle[house] and w-min_weight > 0:
+                edge_found = True
                 g[parent][edge] = (v, w-min_weight)
+            elif v == cycle[house] and w-min_weight == 0:
+                g[parent].pop(edge)
+                edge_found = True
     return g
 
 def multiGraphMaker(block_size, group_prefs):
@@ -115,13 +122,17 @@ def main():
         multigraph.append(multiGraphMaker(i, group_prefs))
     total_swaps = 0
     for j in range(len(multigraph)):
-        graph = multigraph[j]
-        my_cycle = findCycle(graph)
-        try:
-            total_swaps += (j+1)*my_cycle[0]*len(my_cycle[1])
-            # graph = executeSwaps(graph, my_cycle[0], my_cycle)
-        except:
-            total_swaps += 0
+        cycle_found = True
+        while cycle_found:
+            graph = multigraph[j]
+            my_cycle = findCycle(graph)
+            cycle_found = my_cycle is not None
+            multigraph[j] = executeSwaps(graph, my_cycle[0], my_cycle[1])
+            try:
+                total_swaps += (j+1)*my_cycle[0]*len(my_cycle[1])
+                # graph = executeSwaps(graph, my_cycle[0], my_cycle)
+            except:
+                total_swaps += 0
     return total_swaps
 
 if __name__ == "__main__":
