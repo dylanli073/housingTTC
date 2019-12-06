@@ -6,7 +6,7 @@ num_mapping = {1:"Adams", 2:"Cabot", 3:"Currier", 4:"Dunster", 5:"Eliot", 6:"Kir
     9:"Mather", 10:"Pfoho", 11:"Quincy", 12:"Winthrop"}
 group_prefs = {"Adams":{}, "Cabot": {}, "Currier": {}, "Dunster": {}, "Eliot": {}, "Kirkland":{}, "Leverett": {}, "Lowell": {},
     "Mather": {}, "Pfoho": {}, "Quincy": {}, "Winthrop": {}} # organized by house, then by group size
-
+group_list = []
 
 def process(g, n, p, u, v, e, mw, c_i, data):
     u.remove(n)
@@ -15,23 +15,30 @@ def process(g, n, p, u, v, e, mw, c_i, data):
         for (next, w) in g[n]:
             if w < mw:
                 mw = w
-            if next not in v and next not in e:
+            if next in u:
                 p[next] = n
-                c_i, data = process(g, next, p, u, v, e, mw, c_i, data)
+                c_i, data, e, u, v = process(g, next, p, u, v, e, mw, c_i, data)
             elif next in v and not c_i:
-                c_i = True
-                p[next] = n
-                cycle = [next]
-                pointer = p[next]
-                while pointer != next and p[pointer] is not None:
-                    cycle.append(pointer)
-                    pointer = p[pointer]
-                return (c_i, (mw, cycle))
+                c_i = 1
+                seen_neighbors = 1
+                for a, _ in g[next]:
+                    if a in u:
+                        seen_neighbors = seen_neighbors * 0
+                c_i = c_i - seen_neighbors
+                if c_i:
+                    p[next] = n
+                    cycle = [next]
+                    pointer = p[next]
+                    while pointer != next and p[pointer] is not None:
+                        cycle.append(pointer)
+                        pointer = p[pointer]
+                    return (c_i, (mw, cycle), e, u, v)
 
     else:
-        v.remove(n)
-        e.add(n)
-    return (c_i, data)
+        if n in v:
+            v.remove(n)
+            e.add(n)
+    return (c_i, data, e, u, v)
 
 def findCycle(g):
     unvisited = set(range(len(g)))
@@ -48,7 +55,7 @@ def findCycle(g):
     c_i = False
     k = -1
 
-    while (not c_i) and k < len(g):
+    while (not c_i) and k < len(g)-1:
         k += 1
         if g[k] and k in unvisited:
             unvisited.remove(k)
@@ -58,7 +65,7 @@ def findCycle(g):
                     min_weight = w
                 if next not in visited and next not in explored:
                     parents[next] = k
-                    c_i, my_data = process(g, next, parents, unvisited, visited, explored, min_weight, c_i, data)
+                    c_i, my_data, explored, unvisited, visited = process(g, next, parents, unvisited, visited, explored, min_weight, c_i, data)
         else:
             if k in visited:
                 visited.remove(k)
@@ -112,7 +119,7 @@ def main():
         if groupSize < 0 or groupSize > 8:
             print("\nInput group size between 1 and 8 inclusive")
             return False
-
+        group_list.append((groupSize, startingHouse, list((map(int, specs[3:])))))
         try:
             group_prefs[startingHouse][groupSize].append((blocking_name, list((map(int, specs[3:])))))
         except:
@@ -126,8 +133,9 @@ def main():
         while cycle_found:
             graph = multigraph[j]
             my_cycle = findCycle(graph)
-            cycle_found = my_cycle is not None
-            multigraph[j] = executeSwaps(graph, my_cycle[0], my_cycle[1])
+            cycle_found = my_cycle[1] is not None
+            if cycle_found:
+                multigraph[j] = executeSwaps(graph, my_cycle[0], my_cycle[1])
             try:
                 total_swaps += (j+1)*my_cycle[0]*len(my_cycle[1])
                 # graph = executeSwaps(graph, my_cycle[0], my_cycle)

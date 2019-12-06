@@ -17,9 +17,9 @@ def main():
     #     help='total number of samples to be generated for students that wish to switch')
 
     # parser.parse_args
-    for i in range(1, 21):
+    for i in range(1, 13):
         f = open("input{}.txt".format(i), "w")
-        groups = 400
+        groups = 150
         # for each iteration, copy from the original and write to the file according to the spec
         for group in range(groups):
             temp_groups = copy.deepcopy(group_prefs)
