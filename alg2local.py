@@ -1,5 +1,3 @@
-import random
-
 house_mapping = {"Adams": 1, "Cabot": 2, "Currier": 3, "Dunster": 4, "Eliot": 5, "Kirkland": 6, "Leverett": 7, "Lowell": 8,
     "Mather": 9, "Pfoho": 10, "Quincy": 11, "Winthrop": 12}
 num_mapping = {1:"Adams", 2:"Cabot", 3:"Currier", 4:"Dunster", 5:"Eliot", 6:"Kirkland", 7:"Leverett", 8:"Lowell",
@@ -8,7 +6,7 @@ group_prefs = {"Adams":{}, "Cabot": {}, "Currier": {}, "Dunster": {}, "Eliot": {
     "Mather": {}, "Pfoho": {}, "Quincy": {}, "Winthrop": {}} # organized by house, then by group size
 
 
-def process(g, n, p, u, v, e, mw, c_i):
+def process(g, n, p, u, v, e, mw, c_i, data):
     u.remove(n)
     v.add(n)
     if g[n]:
@@ -17,7 +15,7 @@ def process(g, n, p, u, v, e, mw, c_i):
                 mw = w
             if next not in v and next not in e:
                 p[next] = n
-                c_i, data = process(g, next, p, u, v, e, mw, c_i)
+                c_i, data = process(g, next, p, u, v, e, mw, c_i, data)
             elif next in v and not c_i:
                 c_i = True
                 p[next] = n
@@ -39,6 +37,7 @@ def findCycle(g):
     explored = set()
     parents = [None] * len(g)
     min_weight = g[0][0][1]
+    data = (None, None)
     c_i = False
     i = -1
 
@@ -52,60 +51,16 @@ def findCycle(g):
                     min_weight = w
                 if next not in visited and next not in explored:
                     parents[next] = i
-                    c_i, my_data = process(g, next, parents, unvisited, visited, explored, min_weight,c_i)
+                    c_i, my_data = process(g, next, parents, unvisited, visited, explored, min_weight, c_i, data)
         else:
             visited.remove(i)
             explored.add(i)
     return my_data
 
-def executeSwaps(g, min_weight, cycle):
-    for house in range(len(cycle)):
-        try:
-            parent = cycle[house + 1]
-        except:
-            parent = cycle[0]
-        for edge in range(len(g[cycle[parent]])):
-            v, w = g[parent][edge]
-            if v == cycle[house]:
-                g[parent][edge] = (v, w-min_weight)
-    return g
+test_g = [[(5, 1), (2, 1), (10, 1), (6, 1), (7, 2)], [(4, 1), (7, 1), (6, 1), (11, 2)],
+          [(1, 1), (5, 1), (0, 1), (7, 1)], [(2, 1), (9, 1), (10, 1)], [(1, 1), (9, 1), (0, 1), (10, 1), (3, 1)],
+          [(7, 1), (11, 1), (2, 1)], [(2, 1), (9, 1)], [(0, 1), (6, 1), (8, 1), (2, 1), (9, 1)],
+          [(5, 1), (6, 1), (4, 1)], [(4, 1), (3, 1), (0, 1)], [(1, 1), (7, 2), (11, 1), (3, 1)],
+          [(9, 1), (0, 1), (7, 1)]]
 
-def multiGraphMaker(block_size, group_prefs):
-    house_graph = []*len(group_prefs)
-    for name, house in group_prefs.items():
-        if len(house[block_size]) != 0:
-            for block in house[block_size]:
-                house_graph[house_mapping[name]-1].append(block[1][0], len(house[block_size]))
-    return house_graph
-
-def main():
-    total_groups = int(input("Input # of groups: "))
-
-    # accept groups in the format: [groupname, groupsize, starting house name, rankings] rep. in number values
-    # adding each individual into the system, with group name and preference ordering
-    for group in range(total_groups):
-        specs = list(input().split())
-        blocking_name = specs[0]
-        groupSize = int(specs[1])
-        startingHouse = specs[2]
-
-        if groupSize < 0 or groupSize > 8:
-            print("\nInput group size between 1 and 8 inclusive")
-            return False
-
-        # checking if one house appears twice in preference ordering, checking if original house appears in order
-        if len(set(specs[3:] + [str(house_mapping[startingHouse])])) != len(specs[3:] + [str(house_mapping[startingHouse])]):
-            print("\nIncorrect preference order format")
-            return False
-
-        # consider if blocking group name is used before
-
-        try:
-            group_prefs[startingHouse][groupSize].append((blocking_name, list((map(int, specs[3:])))))
-        except:
-            group_prefs[startingHouse][groupSize] = [(blocking_name, list(map(int, specs[3:])))]
-    print(group_prefs)
-    print(multiGraphMaker(8, group_prefs))
-
-if __name__ == "__main__":
-    main()
+print(findCycle(test_g))

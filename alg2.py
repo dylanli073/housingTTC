@@ -8,7 +8,7 @@ group_prefs = {"Adams":{}, "Cabot": {}, "Currier": {}, "Dunster": {}, "Eliot": {
     "Mather": {}, "Pfoho": {}, "Quincy": {}, "Winthrop": {}} # organized by house, then by group size
 
 
-def process(g, n, p, u, v, e, mw, c_i):
+def process(g, n, p, u, v, e, mw, c_i, data):
     u.remove(n)
     v.add(n)
     if g[n]:
@@ -17,7 +17,7 @@ def process(g, n, p, u, v, e, mw, c_i):
                 mw = w
             if next not in v and next not in e:
                 p[next] = n
-                c_i, data = process(g, next, p, u, v, e, mw, c_i)
+                c_i, data = process(g, next, p, u, v, e, mw, c_i, data)
             elif next in v and not c_i:
                 c_i = True
                 p[next] = n
@@ -39,6 +39,7 @@ def findCycle(g):
     explored = set()
     parents = [None] * len(g)
     min_weight = g[0][0][1]
+    data = (None, None)
     c_i = False
     i = -1
 
@@ -52,7 +53,7 @@ def findCycle(g):
                     min_weight = w
                 if next not in visited and next not in explored:
                     parents[next] = i
-                    c_i, my_data = process(g, next, parents, unvisited, visited, explored, min_weight,c_i)
+                    c_i, my_data = process(g, next, parents, unvisited, visited, explored, min_weight, c_i, data)
         else:
             visited.remove(i)
             explored.add(i)
@@ -74,11 +75,14 @@ def multiGraphMaker(block_size, group_prefs):
     house_graph = [[] for i in range(12)]
     for name, house in group_prefs.items():
         if block_size in house and len(house[block_size]) != 0:
+            house_seen_list = [False] * 12
             house_pref_dict = {0:0, 1:0, 2:0, 3:0, 4:0, 5:0, 6:0, 7:0, 8:0, 9:0, 10:0, 11:0}
             for block in house[block_size]:
                 house_pref_dict[block[1][0]-1] += 1
             for block in house[block_size]:
-                house_graph[house_mapping[name]-1].append((block[1][0]-1, house_pref_dict[block[1][0]-1]))
+                if not house_seen_list[block[1][0]-1]:
+                    house_seen_list[block[1][0]-1] = True
+                    house_graph[house_mapping[name]-1].append((block[1][0]-1, house_pref_dict[block[1][0]-1]))
     return house_graph
 
 def main():
@@ -110,17 +114,14 @@ def main():
     multigraph = []
     for i in range(1,9):
         multigraph.append(multiGraphMaker(i, group_prefs))
-    print(multigraph[7])
     total_swaps = 0
     for j in range(len(multigraph)):
         graph = multigraph[j]
-        swaps = 0
+        my_cycle = findCycle(graph)
         try:
-            my_cycle = findcycle(graph)
-            total_swaps += (j+1)*len(my_cycle)
+            total_swaps += (j+1)*my_cycle[0]*len(my_cycle[1])
         except:
-            swaps = 0
-        total_swaps += swaps
+            total_swaps += 0
     return total_swaps
 
 if __name__ == "__main__":
