@@ -1,5 +1,3 @@
-# still needs to run over multiple preferences, 1-12
-
 import random
 
 house_mapping = {"Adams": 1, "Cabot": 2, "Currier": 3, "Dunster": 4, "Eliot": 5, "Kirkland": 6, "Leverett": 7, "Lowell": 8, 
@@ -13,7 +11,7 @@ group_prefs = {"Adams":{}, "Cabot": {}, "Currier": {}, "Dunster": {}, "Eliot": {
 def runTTC(groupSize, pref_number):
     """Function runs TTC for the blocking groups, accepts preferences and round # as inputs, 
     outputs paired trades, updates global ledger
-    """ 
+    """
     iteration = {"Adams": 0, "Cabot": 0, "Currier": 0, "Dunster": 0, "Eliot": 0, "Kirkland": 0, "Leverett": 0, "Lowell": 0, 
             "Mather": 0, "Pfoho": 0, "Quincy": 0, "Winthrop": 0}
     allHouses = set(["Adams", "Cabot", "Currier", "Dunster", "Eliot", "Kirkland", "Leverett", "Lowell", 
@@ -47,7 +45,7 @@ def runTTC(groupSize, pref_number):
         graph_nodes = []
         for house in remainingHouses: 
             while True:
-                if group_prefs[house][groupSize][iteration[house]][2].index(house_mapping[house]) > pref_number - 1:
+                if group_prefs[house][groupSize][iteration[house]][2].index(house_mapping[house]) > pref_number:
                     graph_nodes.append(group_prefs[house][groupSize][iteration[house]]) # returns the tuple associated
                     break
                 else: 
@@ -149,13 +147,12 @@ def main():
 
     for groupSize in range(rounds, 0, -1): 
         # preprocessing the lists in dictionary to order by the largest group size firsts
-        print("Running group size of size " + str(groupSize))
+        print("Running submarket with groups of size " + str(groupSize))
 
         # how far down preferences we want to traverse, range is set to level of preferences
-        for pref_number in range(3):
+        for pref_number in range(12):
             totalTrades += runTTC(groupSize, pref_number)
         print("Total Swaps: " + str(totalTrades))
-        print("Total Score: ")
     return totalTrades
 
 if __name__ == "__main__":
