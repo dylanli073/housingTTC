@@ -6,14 +6,14 @@ house_mapping = {"Adams": 1, "Cabot": 2, "Currier": 3, "Dunster": 4, "Eliot": 5,
     "Mather": 9, "Pfoho": 10, "Quincy": 11, "Winthrop": 12}
 num_mapping = {1:"Adams", 2:"Cabot", 3:"Currier", 4:"Dunster", 5:"Eliot", 6:"Kirkland", 7:"Leverett", 8:"Lowell", 
     9:"Mather", 10:"Pfoho", 11:"Quincy", 12:"Winthrop"}
-group_prefs = {"Adams":{}, "Cabot": {}, "Currier": {}, "Dunster": {}, "Eliot": {}, "Kirkland":{}, "Leverett": {}, "Lowell": {},
+group_prefs = {"Adams":{}, "Cabot": {}, "Currier": {}, "Dunster": {}, "Eliot": {}, "Leverett": {}, "Lowell": {}, "Kirkland":{},
     "Mather": {}, "Pfoho": {}, "Quincy": {}, "Winthrop": {}} # organized by house, then by group size
 
 
 def runTTC(groupSize, pref_number):
     """Function runs TTC for the blocking groups, accepts preferences and round # as inputs, 
     outputs paired trades, updates global ledger
-    """
+    """ 
     iteration = {"Adams": 0, "Cabot": 0, "Currier": 0, "Dunster": 0, "Eliot": 0, "Kirkland": 0, "Leverett": 0, "Lowell": 0, 
             "Mather": 0, "Pfoho": 0, "Quincy": 0, "Winthrop": 0}
     allHouses = set(["Adams", "Cabot", "Currier", "Dunster", "Eliot", "Kirkland", "Leverett", "Lowell", 
@@ -24,6 +24,7 @@ def runTTC(groupSize, pref_number):
     # shuffling each list, RSD mechanism implemented by each house
     for house in allHouses: 
         try:
+            # RSD
             random.shuffle(group_prefs[house][groupSize])
         except: 
             empty_houses.add(house)
@@ -37,15 +38,27 @@ def runTTC(groupSize, pref_number):
             # almost correct, but popping does not allow later rounds to leverage preferences
             if iteration[chosen_house] >= len(group_prefs[chosen_house][groupSize]) - 1:
                 empty_houses.add(chosen_house)
-                # group_prefs[chosen_house].pop(groupSize)
                 halted = False
                 if len(group_prefs[chosen_house][groupSize]) == 0:
                     group_prefs[chosen_house].pop(groupSize)
                 continue
+            
         # adding the names and preference ordering for each node within the graph
         graph_nodes = []
         for house in remainingHouses: 
-            graph_nodes.append(group_prefs[house][groupSize][iteration[house]]) # returns the tuple associated
+            while True:
+                if group_prefs[house][groupSize][iteration[house]][2].index(house_mapping[house]) > pref_number - 1:
+                    graph_nodes.append(group_prefs[house][groupSize][iteration[house]]) # returns the tuple associated
+                    break
+                else: 
+                    group_prefs[house][groupSize].pop(iteration[house])     
+                    if len(group_prefs[house][groupSize]) - 1 <= iteration[house]: # checking if iterations is greater than the number that want to trade
+                        empty_houses.add(house) # already in visited set, will not be visited later
+                        if len(group_prefs[house][groupSize]) == 0:
+                            group_prefs[house].pop(groupSize)
+                        break
+        remainingHouses = remainingHouses.difference(empty_houses)
+
         visited = set()
         graph = preprocessing(graph_nodes, pref_number)
 
@@ -122,7 +135,9 @@ def main():
             return False
 
         # checking if one house appears twice in preference ordering, checking if original house appears in order
-        if len(set(pref_list[3:] + [str(house_mapping[startingHouse])])) != len(pref_list[3:] + [str(house_mapping[startingHouse])]):
+        if len(set(pref_list[3:])) != len(pref_list[3:]):
+            print("\nIncorrect preference order format")
+            return False
 
         # consider if blocking group name is used before
         try:
@@ -131,16 +146,16 @@ def main():
             group_prefs[startingHouse][groupSize] = [(blocking_name, startingHouse, (list(map(int, pref_list[3:]))))]
     # running 8 rounds for all of the possible blocking group sizes
     rounds = 8
-    # graph = preprocessing(rounds)
 
     for groupSize in range(rounds, 0, -1): 
         # preprocessing the lists in dictionary to order by the largest group size firsts
         print("Running group size of size " + str(groupSize))
 
-        # how far down preferences we want to traverse
-        for pref_number in range(5):
+        # how far down preferences we want to traverse, range is set to level of preferences
+        for pref_number in range(3):
             totalTrades += runTTC(groupSize, pref_number)
-        print("totaltrades: " + str(totalTrades))
+        print("Total Swaps: " + str(totalTrades))
+        print("Total Score: ")
     return totalTrades
 
 if __name__ == "__main__":

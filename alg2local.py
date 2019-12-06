@@ -1,3 +1,5 @@
+import random
+
 house_mapping = {"Adams": 1, "Cabot": 2, "Currier": 3, "Dunster": 4, "Eliot": 5, "Kirkland": 6, "Leverett": 7, "Lowell": 8,
     "Mather": 9, "Pfoho": 10, "Quincy": 11, "Winthrop": 12}
 num_mapping = {1:"Adams", 2:"Cabot", 3:"Currier", 4:"Dunster", 5:"Eliot", 6:"Kirkland", 7:"Leverett", 8:"Lowell",
@@ -13,7 +15,7 @@ def process(g, n, p, u, v, e, mw, c_i, data):
         for (next, w) in g[n]:
             if w < mw:
                 mw = w
-            if next not in v and next not in e and not c_i:
+            if next not in v and next not in e:
                 p[next] = n
                 c_i, data = process(g, next, p, u, v, e, mw, c_i, data)
             elif next in v and not c_i:
@@ -36,34 +38,91 @@ def findCycle(g):
     visited = set()
     explored = set()
     parents = [None] * len(g)
-    min_weight = g[0][0][1]
+    min_weight = 1
+    min_weight_set = False
+    for i in range(len(g)):
+        if g[i] and not min_weight_set:
+            min_weight_set = True
+            min_weight = g[i][0][1]
     data = (None, None)
     c_i = False
-    i = -1
+    k = -1
 
-    while not c_i and i < len(g):
-        i += 1
-        if g[i] and i in unvisited:
-            unvisited.remove(i)
-            visited.add(i)
-            for (next, w) in g[i]:
+    while (not c_i) and k < len(g):
+        k += 1
+        if g[k] and k in unvisited:
+            unvisited.remove(k)
+            visited.add(k)
+            for (next, w) in g[k]:
                 if w < min_weight:
                     min_weight = w
                 if next not in visited and next not in explored:
-                    parents[next] = i
+                    parents[next] = k
                     c_i, my_data = process(g, next, parents, unvisited, visited, explored, min_weight, c_i, data)
-                if next == i:
-                    c_i = True
-                    return (min_weight, [next])
         else:
-            visited.remove(i)
-            explored.add(i)
+            if k in visited:
+                visited.remove(k)
+                explored.add(k)
     return my_data
 
-test_g = [[(0, 1), (2, 1), (10, 1), (6, 1), (7, 2)], [(4, 1), (7, 1), (6, 1), (11, 2)],
-          [(1, 1), (5, 1), (0, 1), (7, 1)], [(2, 1), (9, 1), (10, 1)], [(1, 1), (9, 1), (0, 1), (10, 1), (3, 1)],
-          [(7, 1), (11, 1), (2, 1)], [(2, 1), (9, 1)], [(0, 1), (6, 1), (8, 1), (2, 1), (9, 1)],
-          [(5, 1), (6, 1), (4, 1)], [(4, 1), (3, 1), (0, 1)], [(1, 1), (7, 2), (11, 1), (3, 1)],
-          [(9, 1), (0, 1), (7, 1)]]
+def executeSwaps(g, min_weight, cycle):
+    for house in range(len(cycle)):
+        try:
+            parent = cycle[house + 1]
+        except:
+            parent = cycle[0]
+        for edge in range(len(g[cycle[parent]])):
+            v, w = g[parent][edge]
+            if v == cycle[house]:
+                g[parent][edge] = (v, w-min_weight)
+    return g
 
-print(findCycle(test_g))
+def multiGraphMaker(block_size, group_prefs):
+    house_graph = [[] for i in range(12)]
+    for name, house in group_prefs.items():
+        if block_size in house and len(house[block_size]) != 0:
+            house_seen_list = [False] * 12
+            house_pref_dict = {0:0, 1:0, 2:0, 3:0, 4:0, 5:0, 6:0, 7:0, 8:0, 9:0, 10:0, 11:0}
+            for block in house[block_size]:
+                house_pref_dict[block[1][0]-1] += 1
+            for block in house[block_size]:
+                if not house_seen_list[block[1][0]-1] and num_mapping[block[1][0]] != name:
+                    house_seen_list[block[1][0]-1] = True
+                    house_graph[house_mapping[name]-1].append((block[1][0]-1, house_pref_dict[block[1][0]-1]))
+    return house_graph
+
+def main():
+    total_groups = int(input("Input # of groups: "))
+
+    # accept groups in the format: [groupname, groupsize, starting house name, rankings] rep. in number values
+    # adding each individual into the system, with group name and preference ordering
+    for group in range(total_groups):
+        specs = list(input().split())
+        blocking_name = specs[0]
+        groupSize = int(specs[1])
+        startingHouse = specs[2]
+
+        if groupSize < 0 or groupSize > 8:
+            print("\nInput group size between 1 and 8 inclusive")
+            return False
+
+        try:
+            group_prefs[startingHouse][groupSize].append((blocking_name, list((map(int, specs[3:])))))
+        except:
+            group_prefs[startingHouse][groupSize] = [(blocking_name, list(map(int, specs[3:])))]
+    multigraph = []
+    for i in range(1,9):
+        multigraph.append(multiGraphMaker(i, group_prefs))
+    total_swaps = 0
+    for j in range(len(multigraph)):
+        graph = multigraph[j]
+        my_cycle = findCycle(graph)
+        try:
+            total_swaps += (j+1)*my_cycle[0]*len(my_cycle[1])
+            # graph = executeSwaps(graph, my_cycle[0], my_cycle)
+        except:
+            total_swaps += 0
+    return total_swaps
+
+if __name__ == "__main__":
+    print(main())
