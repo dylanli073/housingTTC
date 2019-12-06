@@ -33,19 +33,19 @@ def runTTC(groupSize, pref_number):
         remainingHouses = allHouses.difference(empty_houses)
         if halted:
             chosen_house = random.sample(remainingHouses, 1)[0] # move one down ledger for this house
-            # iteration[chosen_house] += 1
+            iteration[chosen_house] += 1
             # almost correct, but popping does not allow later rounds to leverage preferences
-            group_prefs[chosen_house][groupSize].pop(0)
-            if len(group_prefs[chosen_house][groupSize]) <= 0:
+            if iteration[chosen_house] >= len(group_prefs[chosen_house][groupSize]) - 1:
                 empty_houses.add(chosen_house)
-                group_prefs[chosen_house].pop(groupSize)
+                # group_prefs[chosen_house].pop(groupSize)
                 halted = False
+                if len(group_prefs[chosen_house][groupSize]) == 0:
+                    group_prefs[chosen_house].pop(groupSize)
                 continue
         # adding the names and preference ordering for each node within the graph
         graph_nodes = []
-
         for house in remainingHouses: 
-            graph_nodes.append(group_prefs[house][groupSize][0]) # returns the tuple associated
+            graph_nodes.append(group_prefs[house][groupSize][iteration[house]]) # returns the tuple associated
         visited = set()
         graph = preprocessing(graph_nodes, pref_number)
 
@@ -57,8 +57,6 @@ def runTTC(groupSize, pref_number):
             stack = [house]
             numTradesDFS = 0
             remainingHouses.remove(house)
-            if house not in graph:
-                remainingHouses.remove(house)
 
             # check this while loop, should be finding the house and removing house when it has been considered, consider switching *visited* to *remainingHouses*
             while house in graph: # while house in remainingHouses? 
@@ -79,9 +77,10 @@ def runTTC(groupSize, pref_number):
 
                     # making the trade here
                     numTradesDFS = numTradesDFS + groupSize
-                    group_prefs[housename][groupSize].pop(0)
-                    if len(group_prefs[housename][groupSize]) <= 0: # checking if iterations is greater than the number that want to trade
+                    group_prefs[housename][groupSize].pop(iteration[housename])
+                    if len(group_prefs[housename][groupSize]) - 1 <= iteration[housename]: # checking if iterations is greater than the number that want to trade
                         empty_houses.add(housename) # already in visited set, will not be visited later
+                    if len(group_prefs[housename][groupSize]) == 0:
                         group_prefs[housename].pop(groupSize)
                 return numTradesDFS
             except ValueError: 
@@ -94,7 +93,6 @@ def runTTC(groupSize, pref_number):
             if subtraded > 0: 
                 halted = False
                 numTrades += subtraded
-    print(empty_houses)
     return numTrades
 
 
@@ -140,6 +138,8 @@ def main():
     for groupSize in range(rounds, 0, -1): 
         # preprocessing the lists in dictionary to order by the largest group size firsts
         print("Running group size of size " + str(groupSize))
+
+        # how far down preferences we want to traverse
         for pref_number in range(5):
             totalTrades += runTTC(groupSize, pref_number)
         print("totaltrades: " + str(totalTrades))
