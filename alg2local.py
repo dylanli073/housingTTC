@@ -71,16 +71,12 @@ def executeSwaps(g, min_weight, cycle):
     return g
 
 def multiGraphMaker(block_size, group_prefs):
-    house_graph = {"Adams":{}, "Cabot": {}, "Currier": {}, "Dunster": {}, "Eliot": {}, "Kirkland":{}, "Leverett": {}, "Lowell": {},
-    "Mather": {}, "Pfoho": {}, "Quincy": {}, "Winthrop": {}}
+    house_graph = []*len(group_prefs)
     for name, house in group_prefs.items():
-        out_edges = [0] * 12
-        for _, pref in house[block_size]:
-            out_edges[pref[0]-1] += 1
-        for k in range(len(out_edges)):
-            if out_edges[k] != 0:
-                house_graph[name] = (num_mapping[k], out_edges[k])
-    print(house_graph)
+        if len(house[block_size]) != 0:
+            for block in house[block_size]:
+                house_graph[house_mapping[name]-1].append(block[1][0], len(house[block_size]))
+    return house_graph
 
 def main():
     total_groups = int(input("Input # of groups: "))
@@ -89,9 +85,9 @@ def main():
     # adding each individual into the system, with group name and preference ordering
     for group in range(total_groups):
         specs = list(input().split())
-        groupSize = int(specs[0])
-        startingHouse = specs[1]
-        blocking_name = specs[2]
+        blocking_name = specs[0]
+        groupSize = int(specs[1])
+        startingHouse = specs[2]
 
         if groupSize < 0 or groupSize > 8:
             print("\nInput group size between 1 and 8 inclusive")
@@ -109,6 +105,7 @@ def main():
         except:
             group_prefs[startingHouse][groupSize] = [(blocking_name, list(map(int, specs[3:])))]
     print(group_prefs)
+    print(multiGraphMaker(8, group_prefs))
 
 if __name__ == "__main__":
     main()
