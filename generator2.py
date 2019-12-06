@@ -19,7 +19,7 @@ def main():
     # parser.parse_args
     for i in range(1, 13):
         f = open("input{}.txt".format(i), "w")
-        groups = 150
+        groups = 400
         # for each iteration, copy from the original and write to the file according to the spec
         for group in range(groups):
             temp_groups = copy.deepcopy(group_prefs)

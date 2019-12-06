@@ -13,8 +13,6 @@ def process(g, n, p, u, v, e, mw, c_i, data):
     v.add(n)
     if g[n]:
         for (next, w) in g[n]:
-            if w < mw:
-                mw = w
             if next in u:
                 p[next] = n
                 c_i, data, e, u, v = process(g, next, p, u, v, e, mw, c_i, data)
@@ -30,6 +28,10 @@ def process(g, n, p, u, v, e, mw, c_i, data):
                     cycle = [next]
                     pointer = p[next]
                     while pointer != next and p[pointer] is not None:
+                        for neighbor, weight in g[pointer]:
+                            if neighbor == n:
+                                if weight < mw:
+                                    mw = weight
                         cycle.append(pointer)
                         pointer = p[pointer]
                     return (c_i, (mw, cycle), e, u, v)
@@ -46,12 +48,7 @@ def findCycle(g):
     visited = set()
     explored = set()
     parents = [None] * len(g)
-    min_weight = 1
-    min_weight_set = False
-    for i in range(len(g)):
-        if g[i] and not min_weight_set:
-            min_weight_set = True
-            min_weight = g[i][0][1]
+    min_weight = 999999999
     data = (False, None)
     c_i = False
     k = -1
@@ -62,8 +59,6 @@ def findCycle(g):
             unvisited.remove(k)
             visited.add(k)
             for (next, w) in g[k]:
-                if w < min_weight:
-                    min_weight = w
                 if next not in visited and next not in explored:
                     parents[next] = k
                     c_i, data, explored, unvisited, visited = process(g, next, parents, unvisited, visited, explored,
@@ -113,10 +108,10 @@ def multiGraphMaker(block_size, gl, round):
                    "Leverett": [0 for i in range(12)], "Lowell": [0 for i in range(12)], "Mather": [0 for i in range(12)],
                    "Pfoho": [0 for i in range(12)], "Quincy": [0 for i in range(12)], "Winthrop": [0 for i in range(12)]}
     edge_list = []
-    for groupSize, s_house, prefs in gl:
+    for i in range(len(gl)):
+        groupSize, s_house, prefs = gl[i]
         if groupSize == block_size:
             house_prefs[s_house][prefs[round]-1] += 1
-    for groupSize, s_house, prefs in gl:
         if groupSize == block_size and (s_house, prefs[round]-1) not in edge_list and num_mapping[prefs[round]] != s_house:
             edge_list.append((s_house, prefs[round]-1))
             house_graph[house_mapping[s_house]-1].append((prefs[round]-1, house_prefs[s_house][prefs[round]-1]))
@@ -125,7 +120,7 @@ def multiGraphMaker(block_size, gl, round):
 
 
 def runRound(round, group_list):
-    new_list = group_list
+    new_list = [(_, s_house, prefs) for (_, s_house, prefs) in group_list if not s_house == num_mapping[prefs[round]]]
     multigraph = []
     for i in range(1, 9):
         multigraph.append(multiGraphMaker(i, group_list, round))
@@ -165,7 +160,7 @@ def main():
         except:
             group_prefs[startingHouse][groupSize] = [(blocking_name, list(map(int, specs[3:])))]
     total_swaps = 0
-    for r in range(1, 9):
+    for r in range(11):
         swaps, my_list = runRound(r, group_list)
         total_swaps += swaps
         group_list = my_list
