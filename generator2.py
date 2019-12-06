@@ -20,13 +20,12 @@ def main():
     for i in range(1, 21):
         f = open("input{}.txt".format(i), "w")
         groups = 400
-        f.write(str(groups) + "\n")
         # for each iteration, copy from the original and write to the file according to the spec
         for group in range(groups):
             temp_groups = copy.deepcopy(group_prefs)
             f.write(str(group) + " ")
             f.write(str(random.randint(1, 8)) + " ")
-            f.write(temp_groups.pop(random.randint(0, 11)) + " ")
+            f.write(str(random.sample(temp_groups, 1)[0]) + " ")
 
             while len(temp_groups) > 0:
                 f.write(str(house_mapping[temp_groups.pop(random.randint(0, len(temp_groups) - 1))]) + " ")
