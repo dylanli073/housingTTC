@@ -46,23 +46,23 @@ def findCycle(g):
             min_weight = g[i][0][1]
     data = (None, None)
     c_i = False
-    j = -1
+    k = -1
 
-    while (not c_i) and j < len(g):
-        j += 1
-        if g[j] and j in unvisited:
-            unvisited.remove(j)
-            visited.add(j)
-            for (next, w) in g[j]:
+    while (not c_i) and k < len(g):
+        k += 1
+        if g[k] and k in unvisited:
+            unvisited.remove(k)
+            visited.add(k)
+            for (next, w) in g[k]:
                 if w < min_weight:
                     min_weight = w
                 if next not in visited and next not in explored:
-                    parents[next] = i
+                    parents[next] = k
                     c_i, my_data = process(g, next, parents, unvisited, visited, explored, min_weight, c_i, data)
         else:
-            if j in visited:
-                visited.remove(j)
-                explored.add(j)
+            if k in visited:
+                visited.remove(k)
+                explored.add(k)
     return my_data
 
 def executeSwaps(g, min_weight, cycle):
@@ -106,13 +106,6 @@ def main():
             print("\nInput group size between 1 and 8 inclusive")
             return False
 
-        # checking if one house appears twice in preference ordering, checking if original house appears in order
-        if len(set(specs[3:] + [str(house_mapping[startingHouse])])) != len(specs[3:] + [str(house_mapping[startingHouse])]):
-            print("\nIncorrect preference order format")
-            return False
-
-        # consider if blocking group name is used before
-
         try:
             group_prefs[startingHouse][groupSize].append((blocking_name, list((map(int, specs[3:])))))
         except:
@@ -126,7 +119,7 @@ def main():
         my_cycle = findCycle(graph)
         try:
             total_swaps += (j+1)*my_cycle[0]*len(my_cycle[1])
-            graph = executeSwaps(graph, my_cycle[0], my_cycle)
+            # graph = executeSwaps(graph, my_cycle[0], my_cycle)
         except:
             total_swaps += 0
     return total_swaps
