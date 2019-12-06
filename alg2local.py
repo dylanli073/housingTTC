@@ -13,7 +13,7 @@ def process(g, n, p, u, v, e, mw, c_i, data):
         for (next, w) in g[n]:
             if w < mw:
                 mw = w
-            if next not in v and next not in e:
+            if next not in v and next not in e and not c_i:
                 p[next] = n
                 c_i, data = process(g, next, p, u, v, e, mw, c_i, data)
             elif next in v and not c_i:
@@ -52,12 +52,15 @@ def findCycle(g):
                 if next not in visited and next not in explored:
                     parents[next] = i
                     c_i, my_data = process(g, next, parents, unvisited, visited, explored, min_weight, c_i, data)
+                if next == i:
+                    c_i = True
+                    return (min_weight, [next])
         else:
             visited.remove(i)
             explored.add(i)
     return my_data
 
-test_g = [[(5, 1), (2, 1), (10, 1), (6, 1), (7, 2)], [(4, 1), (7, 1), (6, 1), (11, 2)],
+test_g = [[(0, 1), (2, 1), (10, 1), (6, 1), (7, 2)], [(4, 1), (7, 1), (6, 1), (11, 2)],
           [(1, 1), (5, 1), (0, 1), (7, 1)], [(2, 1), (9, 1), (10, 1)], [(1, 1), (9, 1), (0, 1), (10, 1), (3, 1)],
           [(7, 1), (11, 1), (2, 1)], [(2, 1), (9, 1)], [(0, 1), (6, 1), (8, 1), (2, 1), (9, 1)],
           [(5, 1), (6, 1), (4, 1)], [(4, 1), (3, 1), (0, 1)], [(1, 1), (7, 2), (11, 1), (3, 1)],

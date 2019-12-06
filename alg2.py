@@ -38,25 +38,31 @@ def findCycle(g):
     visited = set()
     explored = set()
     parents = [None] * len(g)
-    min_weight = g[0][0][1]
+    min_weight = 1
+    min_weight_set = False
+    for i in range(len(g)):
+        if g[i] and not min_weight_set:
+            min_weight_set = True
+            min_weight = g[i][0][1]
     data = (None, None)
     c_i = False
-    i = -1
+    j = -1
 
-    while not c_i and i < len(g):
-        i += 1
-        if g[i] and i in unvisited:
-            unvisited.remove(i)
-            visited.add(i)
-            for (next, w) in g[i]:
+    while (not c_i) and j < len(g):
+        j += 1
+        if g[j] and j in unvisited:
+            unvisited.remove(j)
+            visited.add(j)
+            for (next, w) in g[j]:
                 if w < min_weight:
                     min_weight = w
                 if next not in visited and next not in explored:
                     parents[next] = i
                     c_i, my_data = process(g, next, parents, unvisited, visited, explored, min_weight, c_i, data)
         else:
-            visited.remove(i)
-            explored.add(i)
+            if j in visited:
+                visited.remove(j)
+                explored.add(j)
     return my_data
 
 def executeSwaps(g, min_weight, cycle):
@@ -80,7 +86,7 @@ def multiGraphMaker(block_size, group_prefs):
             for block in house[block_size]:
                 house_pref_dict[block[1][0]-1] += 1
             for block in house[block_size]:
-                if not house_seen_list[block[1][0]-1]:
+                if not house_seen_list[block[1][0]-1] and num_mapping[block[1][0]] != name:
                     house_seen_list[block[1][0]-1] = True
                     house_graph[house_mapping[name]-1].append((block[1][0]-1, house_pref_dict[block[1][0]-1]))
     return house_graph
@@ -120,6 +126,7 @@ def main():
         my_cycle = findCycle(graph)
         try:
             total_swaps += (j+1)*my_cycle[0]*len(my_cycle[1])
+            graph = executeSwaps(graph, my_cycle[0], my_cycle)
         except:
             total_swaps += 0
     return total_swaps
