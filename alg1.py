@@ -13,7 +13,7 @@ group_prefs = {"Adams":{}, "Cabot": {}, "Currier": {}, "Dunster": {}, "Eliot": {
 def runTTC(groupSize, pref_number):
     """Function runs TTC for the blocking groups, accepts preferences and round # as inputs, 
     outputs paired trades, updates global ledger
-    """
+    """ 
     iteration = {"Adams": 0, "Cabot": 0, "Currier": 0, "Dunster": 0, "Eliot": 0, "Kirkland": 0, "Leverett": 0, "Lowell": 0, 
             "Mather": 0, "Pfoho": 0, "Quincy": 0, "Winthrop": 0}
     allHouses = set(["Adams", "Cabot", "Currier", "Dunster", "Eliot", "Kirkland", "Leverett", "Lowell", 
