@@ -6,7 +6,7 @@ house_mapping = {"Adams": 1, "Cabot": 2, "Currier": 3, "Dunster": 4, "Eliot": 5,
     "Mather": 9, "Pfoho": 10, "Quincy": 11, "Winthrop": 12}
 num_mapping = {1:"Adams", 2:"Cabot", 3:"Currier", 4:"Dunster", 5:"Eliot", 6:"Kirkland", 7:"Leverett", 8:"Lowell", 
     9:"Mather", 10:"Pfoho", 11:"Quincy", 12:"Winthrop"}
-group_prefs = {"Adams":{}, "Cabot": {}, "Currier": {}, "Dunster": {}, "Eliot": {}, "Leverett": {}, "Lowell": {}, "Kirkland":{},
+group_prefs = {"Adams":{}, "Cabot": {}, "Currier": {}, "Dunster": {}, "Eliot": {}, "Kirkland":{}, "Leverett": {}, "Lowell": {},
     "Mather": {}, "Pfoho": {}, "Quincy": {}, "Winthrop": {}} # organized by house, then by group size
 
 
@@ -123,8 +123,6 @@ def main():
 
         # checking if one house appears twice in preference ordering, checking if original house appears in order
         if len(set(pref_list[3:] + [str(house_mapping[startingHouse])])) != len(pref_list[3:] + [str(house_mapping[startingHouse])]):
-            print("\nIncorrect preference order format")
-            return False
 
         # consider if blocking group name is used before
         try:
