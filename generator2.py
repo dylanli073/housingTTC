@@ -17,7 +17,7 @@ def main():
     #     help='total number of samples to be generated for students that wish to switch')
 
     # parser.parse_args
-    for i in range(1, 13):
+    for i in range(1, 11):
         f = open("input{}.txt".format(i), "w")
         groups = 400
         # for each iteration, copy from the original and write to the file according to the spec

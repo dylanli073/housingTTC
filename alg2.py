@@ -5,9 +5,9 @@ house_mapping = {"Adams": 1, "Cabot": 2, "Currier": 3, "Dunster": 4, "Eliot": 5,
 num_mapping = {1: "Adams", 2: "Cabot", 3: "Currier", 4: "Dunster", 5: "Eliot", 6: "Kirkland", 7: "Leverett",
                8: "Lowell", 9: "Mather", 10: "Pfoho", 11: "Quincy", 12: "Winthrop"}
 group_prefs = {"Adams":{}, "Cabot": {}, "Currier": {}, "Dunster": {}, "Eliot": {}, "Kirkland":{}, "Leverett": {}, "Lowell": {},
-    "Mather": {}, "Pfoho": {}, "Quincy": {}, "Winthrop": {}} # organized by house, then by group size
+    "Mather": {}, "Pfoho": {}, "Quincy": {}, "Winthrop": {}}
 
-
+# Helper function to carry out DFS
 def process(g, n, p, u, v, e, mw, c_i, data):
     u.remove(n)
     v.add(n)
@@ -40,7 +40,7 @@ def process(g, n, p, u, v, e, mw, c_i, data):
             e.add(n)
     return (c_i, data, e, u, v)
 
-
+# Finds cycles + returns min_weight + items in cycle
 def findCycle(g):
     unvisited = set(range(len(g)))
     visited = set()
@@ -74,7 +74,7 @@ def findCycle(g):
                     explored.add(k)
     return data
 
-
+# Helper function to return modified graph with swaps conducted
 def executeSwaps(g, block_size, round, min_weight, cycle, group_list):
     new_list = group_list
     for house in range(len(cycle)):
@@ -105,7 +105,7 @@ def executeSwaps(g, block_size, round, min_weight, cycle, group_list):
                         new_list.pop(iter)
     return g, new_list
 
-
+# Constructs individual graphs for graph of markets
 def multiGraphMaker(block_size, gl, round):
     house_graph = [[] for i in range(12)]
     house_prefs = {"Adams":[0 for i in range(12)], "Cabot": [0 for i in range(12)], "Currier": [0 for i in range(12)],
@@ -123,7 +123,7 @@ def multiGraphMaker(block_size, gl, round):
 
     return house_graph
 
-
+# Calls all necessary functions for round of preferences
 def runRound(round, group_list):
     new_list = [(_, s_house, prefs) for (_, s_house, prefs) in group_list if not s_house == num_mapping[prefs[round]]]
     multigraph = []
