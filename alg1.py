@@ -46,7 +46,19 @@ def runTTC(groupSize, pref_number):
         # adding the names and preference ordering for each node within the graph
         graph_nodes = []
         for house in remainingHouses: 
-            graph_nodes.append(group_prefs[house][groupSize][iteration[house]]) # returns the tuple associated
+            while True:
+                if group_prefs[house][groupSize][iteration[house]][2].index(house_mapping[house]) > pref_number - 1:
+                    graph_nodes.append(group_prefs[house][groupSize][iteration[house]]) # returns the tuple associated
+                    break
+                else: 
+                    group_prefs[house][groupSize].pop(iteration[house])     
+                    if len(group_prefs[house][groupSize]) - 1 <= iteration[house]: # checking if iterations is greater than the number that want to trade
+                        empty_houses.add(house) # already in visited set, will not be visited later
+                        if len(group_prefs[house][groupSize]) == 0:
+                            group_prefs[house].pop(groupSize)
+                        break
+        remainingHouses = remainingHouses.difference(empty_houses)
+
         visited = set()
         graph = preprocessing(graph_nodes, pref_number)
 
@@ -123,7 +135,7 @@ def main():
             return False
 
         # checking if one house appears twice in preference ordering, checking if original house appears in order
-        if len(set(pref_list[3:] + [str(house_mapping[startingHouse])])) != len(pref_list[3:] + [str(house_mapping[startingHouse])]):
+        if len(set(pref_list[3:])) != len(pref_list[3:]):
             print("\nIncorrect preference order format")
             return False
 
